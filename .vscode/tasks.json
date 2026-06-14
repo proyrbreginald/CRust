@@ -1,0 +1,126 @@
+// https://code.visualstudio.com/api/references/icons-in-labels 获取图标名称
+// 本工程使用 Meson 构建系统，交叉编译目标：ARM Cortex-M4 (HC32F460)
+// 构建目录: build/  (已使用 cross_file.txt 配置)
+{
+    "version": "2.0.0",
+    "tasks":[
+        // 1. 清理类任务
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "meson compile -C build --clean",
+            "group": "build",
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(trash) Clean",
+                "detail" : "清理编译产物"
+              }
+            }
+        },
+
+        // 2. 配置类任务
+        {
+            "label": "Setup",
+            "type": "shell",
+            "command": "meson setup build --cross-file cross_file.txt",
+            "group": "build",
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(gear) Setup",
+                "detail" : "首次 Meson 配置"
+              }
+            }
+        },
+        {
+            "label": "Resetup",
+            "type": "shell",
+            "command": "meson setup --reconfigure build --cross-file cross_file.txt",
+            "group": "build",
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(sync) Resetup",
+                "detail" : "重新配置"
+              }
+            }
+        },
+
+        // 3. 构建类任务
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "meson compile -C build",
+            "group": { "kind": "build", "isDefault": true },
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(debug-alt) Build",
+                "detail" : "执行 Meson 编译"
+              }
+            }
+        },
+
+        // 4. 组合任务
+        {
+            "label": "Info",
+            "type": "shell",
+            "command": "size -A ./build/pd-embedded.elf",
+            "group": "build",
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(info) Info",
+                "detail" : "查看段信息"
+              }
+            }
+        },
+
+        // 5. 镜像生成任务
+        {
+            "label": "Bin",
+            "type": "shell",
+            "command": "ninja -C build pd-embedded.hex pd-embedded.bin",
+            "group": "build",
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(archive) Bin",
+                "detail" : "生成 HEX 和 BIN 镜像文件"
+              }
+            }
+        },
+
+        // 6. 烧录任务
+        {
+            "label": "Flash",
+            "type": "shell",
+            "command": ".venv/bin/pyocd flash --target hc32f460xe --erase chip ./build/pd-embedded.elf",
+            "group": "build",
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(chip) Flash",
+                "detail" : "烧录 ELF 镜像"
+              }
+            }
+        },
+
+        // 7. 组合任务
+        {
+            "label": "Auto",
+            "type": "shell",
+            "dependsOn": ["Clean", "Setup", "Build", "Flash"],
+            "dependsOrder": "sequence",
+            "group": "build",
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(zap) Auto",
+                "detail" : "清理 + 配置 + 编译 + 烧录"
+              }
+            }
+        }
+    ]
+}

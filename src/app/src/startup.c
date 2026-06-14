@@ -1,0 +1,93 @@
+#include <hc32_ll.h>
+#include <rtt.h>
+
+/**
+ * @brief  切换为最高性能模式
+ * @param  None
+ * @retval None
+ */
+static void bsp_switch_performance(void)
+{
+#define BSP_XTAL_PORT (GPIO_PORT_H)
+#define BSP_XTAL_PIN (GPIO_PIN_00 | GPIO_PIN_01)
+
+        stc_clock_xtal_init_t stcXtalInit;
+        stc_clock_pll_init_t stcMpllInit;
+
+        GPIO_SetReadWaitCycle(GPIO_RD_WAIT3);
+
+        GPIO_AnalogCmd(BSP_XTAL_PORT, BSP_XTAL_PIN, ENABLE);
+        (void)CLK_XtalStructInit(&stcXtalInit);
+        (void)CLK_PLLStructInit(&stcMpllInit);
+
+        /* Set bus clk div. */
+        CLK_SetClockDiv(CLK_BUS_CLK_ALL,
+                        (CLK_HCLK_DIV1 | CLK_EXCLK_DIV2 | CLK_PCLK0_DIV1 |
+                         CLK_PCLK1_DIV2 | CLK_PCLK2_DIV4 | CLK_PCLK3_DIV4 |
+                         CLK_PCLK4_DIV2));
+
+        /* Config Xtal and enable Xtal */
+        stcXtalInit.u8Mode = CLK_XTAL_MD_OSC;
+        stcXtalInit.u8Drv = CLK_XTAL_DRV_ULOW;
+        stcXtalInit.u8State = CLK_XTAL_ON;
+        stcXtalInit.u8StableTime = CLK_XTAL_STB_2MS;
+        (void)CLK_XtalInit(&stcXtalInit);
+
+        /* MPLL config (XTAL / pllmDiv * plln / PllpDiv = 200M). */
+        stcMpllInit.PLLCFGR = 0UL;
+        stcMpllInit.PLLCFGR_f.PLLM = 3UL - 1UL;
+        stcMpllInit.PLLCFGR_f.PLLN = 100UL - 1UL;
+        stcMpllInit.PLLCFGR_f.PLLP = 2UL - 1UL;
+        stcMpllInit.PLLCFGR_f.PLLQ = 2UL - 1UL;
+        stcMpllInit.PLLCFGR_f.PLLR = 2UL - 1UL;
+        stcMpllInit.u8PLLState = CLK_PLL_ON;
+        stcMpllInit.PLLCFGR_f.PLLSRC = CLK_PLL_SRC_XTAL;
+        (void)CLK_PLLInit(&stcMpllInit);
+        /* Wait MPLL ready. */
+        while (SET != CLK_GetStableStatus(CLK_STB_FLAG_PLL))
+        {
+                ;
+        }
+
+        /* sram init include read/write wait cycle setting */
+        SRAM_SetWaitCycle(SRAM_SRAMH, SRAM_WAIT_CYCLE0, SRAM_WAIT_CYCLE0);
+        SRAM_SetWaitCycle((SRAM_SRAM12 | SRAM_SRAM3 | SRAM_SRAMR),
+                          SRAM_WAIT_CYCLE1, SRAM_WAIT_CYCLE1);
+
+        /* flash read wait cycle setting */
+        (void)EFM_SetWaitCycle(EFM_WAIT_CYCLE5);
+        /* 3 cycles for 126MHz ~ 200MHz */
+        GPIO_SetReadWaitCycle(GPIO_RD_WAIT3);
+        /* Switch driver ability */
+        (void)PWC_HighSpeedToHighPerformance();
+        /* Switch system clock source to MPLL. */
+        CLK_SetSysClockSrc(CLK_SYSCLK_SRC_PLL);
+        /* Reset cache ram */
+        EFM_CacheRamReset(ENABLE);
+        EFM_CacheRamReset(DISABLE);
+        /* Enable cache */
+        EFM_CacheCmd(ENABLE);
+}
+
+/**
+ * @brief 复位处理函数执行完后调用，做 RTOS 启动前的系统性初始化。
+ * @param  None
+ * @retval None
+ */
+void startup(void)
+{
+        // 启用 FPU 并初始化 LL 驱动库
+        SystemInit();
+
+        // 解除对所有外设寄存器的写保护
+        LL_PERIPH_WE(LL_PERIPH_ALL);
+
+        // 切换为最高性能模式
+        bsp_switch_performance();
+
+        // 启动 RT-Thread 操作系统
+        // extern int rtthread_startup(void);
+        // rtthread_startup();
+        extern void main(void);
+        main();
+}

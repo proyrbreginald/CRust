@@ -1,0 +1,56 @@
+# 私有源文件
+_driver_src = files(
+    './src/hc32_ll_adc.c',
+    './src/hc32_ll_aes.c',
+    './src/hc32_ll_aos.c',
+    './src/hc32_ll_can.c',
+    './src/hc32_ll_clk.c',
+    './src/hc32_ll_cmp.c',
+    './src/hc32_ll_crc.c',
+    './src/hc32_ll_dbgc.c',
+    './src/hc32_ll_dcu.c',
+    './src/hc32_ll_dma.c',
+    './src/hc32_ll_efm.c',
+    './src/hc32_ll_emb.c',
+    './src/hc32_ll_event_port.c',
+    './src/hc32_ll_fcg.c',
+    './src/hc32_ll_fcm.c',
+    './src/hc32_ll_gpio.c',
+    './src/hc32_ll_hash.c',
+    './src/hc32_ll_i2c.c',
+    './src/hc32_ll_i2s.c',
+    './src/hc32_ll_icg.c',
+    './src/hc32_ll_interrupts.c',
+    './src/hc32_ll_keyscan.c',
+    './src/hc32_ll_mpu.c',
+    './src/hc32_ll_ots.c',
+    './src/hc32_ll_pwc.c',
+    './src/hc32_ll_qspi.c',
+    './src/hc32_ll_rmu.c',
+    './src/hc32_ll_rtc.c',
+    './src/hc32_ll_sdioc.c',
+    './src/hc32_ll_spi.c',
+    './src/hc32_ll_sram.c',
+    './src/hc32_ll_swdt.c',
+    './src/hc32_ll_tmr0.c',
+    './src/hc32_ll_tmr4.c',
+    './src/hc32_ll_tmr6.c',
+    './src/hc32_ll_tmra.c',
+    './src/hc32_ll_trng.c',
+    './src/hc32_ll_usart.c',
+    './src/hc32_ll_usb.c',
+    './src/hc32_ll_utility.c',
+    './src/hc32_ll_wdt.c',
+    './src/hc32_ll.c',
+    './src/hc32f460_ll_interrupts_share.c',
+)
+
+# 私有头文件路径
+_driver_inc = include_directories('./inc')
+
+# 添加依赖
+driver_dep = declare_dependency(
+    compile_args : ['-DUSE_DDL_DRIVER'],
+    sources : _driver_src,
+    include_directories : _driver_inc,
+)

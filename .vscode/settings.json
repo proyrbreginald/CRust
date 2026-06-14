@@ -1,0 +1,10 @@
+{    
+    // Meson 插件设置
+    "mesonbuild.configureOnOpen": false,
+
+    // clangd 插件设置
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/build" // 将路径替换成你的实际目录
+    ],
+    "git.ignoreLimitWarning": true
+}

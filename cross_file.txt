@@ -1,0 +1,16 @@
+[binaries]
+c = 'arm-none-eabi-gcc'
+cpp = 'arm-none-eabi-g++'
+ar = 'arm-none-eabi-ar'
+ld = 'arm-none-eabi-ld'
+strip = 'arm-none-eabi-strip'
+
+[properties]
+c_args = []
+c_link_args = []
+
+[host_machine]
+system = 'bare metal'      # 目标系统是裸机
+cpu_family = 'arm'         # 处理器家族
+cpu = 'cortex-m4'          # 具体内核型号
+endian = 'little'          # 小端模式

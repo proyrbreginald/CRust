@@ -1,0 +1,20 @@
+# 针对 C 语言（使用 C++ 模式，兼容 C 语法）
+Language: Cpp
+BasedOnStyle: LLVM
+
+# 缩进宽度为 8 个空格
+IndentWidth: 8
+# 连续行缩进宽度与普通缩进一致
+ContinuationIndentWidth: 8
+# 不使用制表符，全部使用空格
+UseTab: Never
+TabWidth: 8
+
+# 行宽限制 80 列
+ColumnLimit: 80
+
+# 大括号独立一行（Allman 风格）
+BreakBeforeBraces: Allman
+
+# 指针声明时 * 紧贴变量名（保持 LLVM 默认风格）
+PointerAlignment: Left
