@@ -32,3 +32,15 @@ pip install -r requirements.txt
 | **Auto** | 一键流程 | 依次执行 **Clean → Setup → Build → Flash** |
 
 依次点击状态栏的对应按钮即可，无需手动输入 Meson 命令。
+
+### 3. Kconfig 配置
+
+```bash
+cd src/libs/rtos
+
+# 基于 Kconfig 生成 .config（文本交互）
+menuconfig Kconfig
+
+# 将 .config 转换为 menuconfig.h
+genconfig --header-path ./src/config/inc/menuconfig.h
+```

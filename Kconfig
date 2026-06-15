@@ -1,0 +1,21 @@
+mainmenu "PD-Embedded Project Configuration"
+
+# 配置项目代号
+config PROJECT_NAME
+    string "Project Name"
+    default "PD-Embedded"
+
+# 配置项目版本号
+config PROJECT_VERSION
+    string "Project Version"
+    default "0.1.0"
+
+# 配置 Startup
+menu "Config Startup"
+    config STARTUP_SWITCH_PERFORMANCE
+        bool "MCU Switchs To Performance"
+        default true
+endmenu
+
+# 导入子目录配置
+rsource "src/libs/rtos/Kconfig"

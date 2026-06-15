@@ -1,8 +1,14 @@
-{    
-    // Meson 插件设置
+{
+    // 1. 允许 Python 扩展自动激活终端环境
+    "python.terminal.activateEnvironment": true,
+    
+    // 2. 指定项目虚拟环境中的 Python 解释器路径
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+
+    // 3. Meson 插件设置
     "mesonbuild.configureOnOpen": false,
 
-    // clangd 插件设置
+    // 4. Clangd 插件设置
     "clangd.arguments": [
         "--compile-commands-dir=${workspaceFolder}/build" // 将路径替换成你的实际目录
     ],

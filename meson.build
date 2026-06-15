@@ -1,4 +1,4 @@
-project('pd-embedded', 'c', default_options : ['c_std=gnu17'])
+project('PD-Embedded', 'c', default_options : ['c_std=gnu17'])
 
 # 进入 src 目录，执行其中的 meson.build
 subdir('src')
@@ -7,6 +7,7 @@ subdir('src')
 common_c_args = [
     '-mcpu=cortex-m4',      # 替换为你的MCU核心，如 cortex-m3, cortex-m0plus
     '-mthumb',              # 使用Thumb指令集
+    '-mfpu=fpv4-sp-d16',    # Cortex-M4F 单精度浮点单元
     '-mfloat-abi=hard',     # 如果你的MCU有FPU，可改为 'hard'
     '-ffunction-sections',  # 优化，未使用的函数不链接
     '-fdata-sections',      # 优化，未使用的数据不链接

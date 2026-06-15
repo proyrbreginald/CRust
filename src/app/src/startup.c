@@ -1,4 +1,5 @@
 #include <hc32_ll.h>
+#include <menuconfig.h>
 #include <rtt.h>
 
 /**
@@ -82,8 +83,10 @@ void startup(void)
         // 解除对所有外设寄存器的写保护
         LL_PERIPH_WE(LL_PERIPH_ALL);
 
+#ifdef CONFIG_STARTUP_SWITCH_PERFORMANCE
         // 切换为最高性能模式
         bsp_switch_performance();
+#endif
 
         // 启动 RT-Thread 操作系统
         // extern int rtthread_startup(void);
