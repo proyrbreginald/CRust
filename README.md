@@ -13,6 +13,9 @@ python3 -m venv .venv
 # 激活虚拟环境
 source .venv/bin/activate
 
+# 安装 pip
+python -m ensurepip --upgrade
+
 # 安装依赖（pyOCD 等工具）
 pip install -r requirements.txt
 ```
@@ -36,11 +39,12 @@ pip install -r requirements.txt
 ### 3. Kconfig 配置
 
 ```bash
-cd src/libs/rtos
-
 # 基于 Kconfig 生成 .config（文本交互）
 menuconfig Kconfig
 
 # 将 .config 转换为 menuconfig.h
 genconfig --header-path ./src/config/inc/menuconfig.h
+
+# 将 CONFIG_ 过滤掉
+sed -i 's/#define CONFIG_/#define /g' src/config/inc/menuconfig.h
 ```
