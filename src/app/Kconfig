@@ -1,0 +1,6 @@
+# 配置 Startup
+menu "Config Startup"
+    config STARTUP_SWITCH_PERFORMANCE
+        bool "MCU Switchs To Performance"
+        default true
+endmenu

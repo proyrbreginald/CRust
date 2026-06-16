@@ -83,7 +83,7 @@ void startup(void)
         // 解除对所有外设寄存器的写保护
         LL_PERIPH_WE(LL_PERIPH_ALL);
 
-#ifdef CONFIG_STARTUP_SWITCH_PERFORMANCE
+#ifdef STARTUP_SWITCH_PERFORMANCE
         // 切换为最高性能模式
         bsp_switch_performance();
 #endif

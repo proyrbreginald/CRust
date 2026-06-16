@@ -33,8 +33,8 @@ extern "C"
  * @brief HC32F4xx Device Include
  */
 #if defined(HC32F460)
-#include "hc32f460.h"
-#include "system_hc32f460.h"
+#include <hc32f460.h>
+#include <system_hc32f460.h>
 #else
 #error "Please select first the target HC32xxxx device used in your application (in hc32xxxx.h file)"
 #endif

@@ -38,8 +38,8 @@ extern "C"
  ******************************************************************************/
 #include "hc32_ll_def.h"
 
-#include "hc32f4xx.h"
-#include "hc32f4xx_conf.h"
+#include <hc32f4xx.h>
+#include <menuconfig.h>
         /**
          * @addtogroup LL_Driver
          * @{

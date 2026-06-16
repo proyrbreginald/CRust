@@ -31,6 +31,9 @@ fi
 
 cd "$PROJECT_DIR"
 
+echo "[INFO] 确保输出目录存在 ..."
+mkdir -p "$(dirname "$OUTPUT_HEADER")"
+
 echo "[INFO] 从 .config 生成头文件 ..."
 genconfig --header-path "$OUTPUT_HEADER"
 

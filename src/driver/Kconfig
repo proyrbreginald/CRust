@@ -1,0 +1,189 @@
+# HC32 Device Driver Library (DDL) 模块配置
+
+menu "HC32 DDL Config"
+
+config LL_ICG_ENABLE
+    bool "ICG"
+    default y
+    help
+        Initialization configuration.
+        Hardware behavior that automatically initializes after hardware startup.
+
+config LL_UTILITY_ENABLE
+    bool "Utility"
+    default y
+    help
+        Device Driver Library utility module.
+
+config LL_PRINT_ENABLE
+    bool "Print"
+    default n
+    help
+        Enable DDL printf function support.
+
+# --- 外设模块 ---
+
+config LL_ADC_ENABLE
+    bool "ADC"
+    default n
+
+config LL_AES_ENABLE
+    bool "AES"
+    default n
+
+config LL_AOS_ENABLE
+    bool "AOS"
+    default n
+
+config LL_CAN_ENABLE
+    bool "CAN"
+    default n
+
+config LL_CLK_ENABLE
+    bool "CLK"
+    default y
+
+config LL_CMP_ENABLE
+    bool "CMP"
+    default n
+
+config LL_CRC_ENABLE
+    bool "CRC"
+    default n
+
+config LL_DBGC_ENABLE
+    bool "DBGC"
+    default n
+
+config LL_DCU_ENABLE
+    bool "DCU"
+    default n
+
+config LL_DMA_ENABLE
+    bool "DMA"
+    default n
+
+config LL_EFM_ENABLE
+    bool "EFM"
+    default y
+
+config LL_EMB_ENABLE
+    bool "EMB"
+    default n
+
+config LL_EVENT_PORT_ENABLE
+    bool "Event Port"
+    default n
+
+config LL_FCG_ENABLE
+    bool "FCG"
+    default y
+
+config LL_FCM_ENABLE
+    bool "FCM"
+    default n
+
+config LL_GPIO_ENABLE
+    bool "GPIO"
+    default y
+
+config LL_HASH_ENABLE
+    bool "HASH"
+    default n
+
+config LL_I2C_ENABLE
+    bool "I2C"
+    default n
+
+config LL_I2S_ENABLE
+    bool "I2S"
+    default n
+
+config LL_INTERRUPTS_ENABLE
+    bool "Interrupts"
+    default y
+    help
+        Interrupt controller module.
+        Must be enabled for interrupt handling.
+
+config LL_INTERRUPTS_SHARE_ENABLE
+    bool "Interrupts Share"
+    default n
+
+config LL_KEYSCAN_ENABLE
+    bool "Keys Scan"
+    default n
+
+config LL_MPU_ENABLE
+    bool "MPU"
+    default n
+
+config LL_OTS_ENABLE
+    bool "OTS"
+    default n
+
+config LL_PWC_ENABLE
+    bool "PWC"
+    default y
+
+config LL_QSPI_ENABLE
+    bool "QSPI"
+    default n
+
+config LL_RMU_ENABLE
+    bool "RMU"
+    default n
+
+config LL_RTC_ENABLE
+    bool "RTC"
+    default n
+
+config LL_SDIOC_ENABLE
+    bool "SDIOC"
+    default n
+
+config LL_SPI_ENABLE
+    bool "SPI"
+    default n
+
+config LL_SRAM_ENABLE
+    bool "SRAM"
+    default y
+
+config LL_SWDT_ENABLE
+    bool "SWDT"
+    default n
+
+config LL_TMR0_ENABLE
+    bool "TMR0"
+    default n
+
+config LL_TMR4_ENABLE
+    bool "TMR4"
+    default n
+
+config LL_TMR6_ENABLE
+    bool "TMR6"
+    default n
+
+config LL_TMRA_ENABLE
+    bool "TMRA"
+    default n
+
+config LL_TRNG_ENABLE
+    bool "TRNG"
+    default n
+
+config LL_USART_ENABLE
+    bool "USART"
+    default y
+
+config LL_USB_ENABLE
+    bool "USB"
+    default n
+
+config LL_WDT_ENABLE
+    bool "WDT"
+    default n
+
+endmenu

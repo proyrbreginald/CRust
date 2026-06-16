@@ -28,6 +28,8 @@ static void LED_Init(void)
  */
 void main(void)
 {
+        rtt_write("start!\n", 7);
+
         /* LED initialize */
         LED_Init();
 
@@ -35,6 +37,6 @@ void main(void)
         {
                 LED_G_TOGGLE;
                 DDL_DelayMS(500u);
-                rtt_write("test\n", 5);
+                rtt_write("hello\n", 6);
         }
 }
