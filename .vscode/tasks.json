@@ -4,22 +4,67 @@
 {
     "version": "2.0.0",
     "tasks":[
-        // 1. 清理类任务
+        // 1. 虚拟环境检查与配置
+        {
+            "label": "Venv",
+            "type": "shell",
+            "command": "./script/venv.sh",
+            "group": "build",
+            "presentation": { "reveal": "silent" },
+            "options": {
+              "statusbar": {
+                "label": "$(python) Venv",
+                "detail" : "虚拟环境检查与配置"
+              }
+            }
+        },
+
+        // 2. 交互式配置与裁剪代码
+        {
+            "label": "Menuconfig",
+            "type": "shell",
+            "command": "./script/menuconfig.sh",
+            "group": "build",
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(preview) Menuconfig",
+                "detail" : "交互式配置与裁剪代码"
+              }
+            }
+        },
+
+        // 3. 生成配置头文件
+        {
+            "label": "Genconfig",
+            "type": "shell",
+            "command": "./script/genconfig.sh",
+            "group": "build",
+            "presentation": { "reveal": "always" },
+            "options": {
+              "statusbar": {
+                "label": "$(file-code) Genconfig",
+                "detail" : "生成配置头文件"
+              }
+            }
+        },
+
+        // 4. 清理构建目录
         {
             "label": "Clean",
             "type": "shell",
-            "command": "meson compile -C build --clean",
+            "command": "rm -rf build",
             "group": "build",
             "presentation": { "reveal": "always" },
             "options": {
               "statusbar": {
                 "label": "$(trash) Clean",
-                "detail" : "清理编译产物"
+                "detail" : "清理构建目录"
               }
             }
         },
 
-        // 2. 配置类任务
+        // 5. 生成构建系统
         {
             "label": "Setup",
             "type": "shell",
@@ -29,25 +74,12 @@
             "options": {
               "statusbar": {
                 "label": "$(gear) Setup",
-                "detail" : "首次 Meson 配置"
-              }
-            }
-        },
-        {
-            "label": "Resetup",
-            "type": "shell",
-            "command": "meson setup --reconfigure build --cross-file cross_file.txt",
-            "group": "build",
-            "presentation": { "reveal": "always" },
-            "options": {
-              "statusbar": {
-                "label": "$(sync) Resetup",
-                "detail" : "重新配置"
+                "detail" : "生成构建系统"
               }
             }
         },
 
-        // 3. 构建类任务
+        // 6. 执行交叉编译
         {
             "label": "Build",
             "type": "shell",
@@ -57,12 +89,12 @@
             "options": {
               "statusbar": {
                 "label": "$(debug-alt) Build",
-                "detail" : "执行 Meson 编译"
+                "detail" : "执行交叉编译"
               }
             }
         },
 
-        // 4. 组合任务
+        // 7. 输出程序段信息
         {
             "label": "Info",
             "type": "shell",
@@ -72,12 +104,12 @@
             "options": {
               "statusbar": {
                 "label": "$(info) Info",
-                "detail" : "查看段信息"
+                "detail" : "输出程序段信息"
               }
             }
         },
 
-        // 5. 镜像生成任务
+        // 8. 生成镜像文件
         {
             "label": "Bin",
             "type": "shell",
@@ -87,16 +119,17 @@
             "options": {
               "statusbar": {
                 "label": "$(archive) Bin",
-                "detail" : "生成 HEX 和 BIN 镜像文件"
+                "detail" : "生成镜像文件"
               }
             }
         },
 
-        // 6. 烧录任务
+        // 9. 烧录任务
         {
             "label": "Flash",
             "type": "shell",
             "command": ".venv/bin/pyocd flash --target hc32f460xe --erase chip ./build/pd-embedded.elf",
+            "dependsOn": ["Venv"],
             "group": "build",
             "presentation": { "reveal": "always" },
             "options": {
@@ -107,18 +140,18 @@
             }
         },
 
-        // 7. 组合任务
+        // 10. 组合任务
         {
             "label": "Auto",
             "type": "shell",
-            "dependsOn": ["Clean", "Setup", "Build", "Flash"],
+            "dependsOn": ["Clean", "Setup", "Build", "Info", "Flash"],
             "dependsOrder": "sequence",
             "group": "build",
             "presentation": { "reveal": "always" },
             "options": {
               "statusbar": {
                 "label": "$(zap) Auto",
-                "detail" : "清理 + 配置 + 编译 + 烧录"
+                "detail" : "自动执行流"
               }
             }
         }

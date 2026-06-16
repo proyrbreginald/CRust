@@ -1,4 +1,6 @@
-project('PD-Embedded', 'c', default_options : ['c_std=gnu17'])
+project('PD-Embedded', 'c',
+    version : '0.1.0',
+    default_options : ['c_std=gnu17'])
 
 # 进入 src 目录，执行其中的 meson.build
 subdir('src')

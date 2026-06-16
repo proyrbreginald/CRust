@@ -5,7 +5,7 @@ ar = 'arm-none-eabi-ar'
 ld = 'arm-none-eabi-ld'
 strip = 'arm-none-eabi-strip'
 
-[properties]
+[built-in options]
 c_args = []
 c_link_args = []
 
