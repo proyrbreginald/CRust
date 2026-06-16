@@ -1,0 +1,25 @@
+{
+    "recommendations": [
+        "ms-ceintl.vscode-language-pack-zh-hans",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-azuretools.vscode-containers",
+        "vizards.deepseek-v4-for-copilot",
+        "microhobby.linuxkerneldev",
+        "tamasfe.even-better-toml",
+        "waderyan.gitblame",
+        "mhutchie.git-graph",
+        "basdp.language-gas-x86",
+        "trond-snekvik.gnu-mapfiles",
+        "zixuanwang.linkerscript",
+        "mesonbuild.mesonbuild",
+        "nordic-semiconductor.nrf-kconfig",
+        "albertweiku.pe-elf-viewer",
+        "ms-python.python",
+        "ms-python.vscode-python-envs",
+        "rust-lang.rust-analyzer",
+        "actboy168.tasks",
+        "myriad-dreamin.tinymist",
+        "vscode-icons-team.vscode-icons",
+        "tomoki1207.pdf",
+    ]
+}
