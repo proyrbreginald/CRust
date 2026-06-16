@@ -11,4 +11,6 @@
 #define LL_PWC_ENABLE 1
 #define LL_SRAM_ENABLE 1
 #define LL_USART_ENABLE 1
-#define STARTUP_SWITCH_PERFORMANCE 1
+#define BSP_BOARD "hc32f460_core"
+#define BSP_USING_TIMER 1
+#define BSP_USING_GPIO 1

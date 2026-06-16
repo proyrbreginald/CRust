@@ -22,5 +22,6 @@ endchoice
 
 # 导入子目录配置
 rsource "src/driver/Kconfig"
+rsource "src/bsp/Kconfig"
 # rsource "src/libs/rtos/Kconfig"
 rsource "src/app/Kconfig"

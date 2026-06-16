@@ -1,0 +1,25 @@
+menu "BSP Config"
+
+config BSP_BOARD
+    string "Board Target"
+    default "hc32f460_core"
+    help
+        Target board name. This selects the board-specific
+        pin mappings and initialization parameters.
+
+# ------------------- Timer / Delay -------------------
+config BSP_USING_TIMER
+    bool "Enable SysTick Timer"
+    default y
+    help
+        Enable SysTick-based millisecond delay.
+
+# ------------------- GPIO / LED -------------------
+config BSP_USING_GPIO
+    bool "Enable GPIO Control"
+    default y
+    help
+        Enable GPIO initialization for on-board LEDs
+        and buttons.
+
+endmenu

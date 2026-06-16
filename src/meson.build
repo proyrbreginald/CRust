@@ -2,10 +2,11 @@
 subdir('cmsis')
 subdir('driver')
 subdir('libs')
+subdir('bsp')
 subdir('config')
 subdir('app')
 
 # 添加依赖
 src_dep = declare_dependency(
-    dependencies : [cmsis_dep, driver_dep, libs_dep, config_dep, app_dep], # 传递依赖链
+    dependencies : [cmsis_dep, driver_dep, libs_dep, bsp_dep, config_dep, app_dep], # 传递依赖链
 )
