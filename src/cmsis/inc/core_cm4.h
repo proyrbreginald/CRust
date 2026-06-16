@@ -167,7 +167,7 @@ extern "C"
 
 #endif
 
-#include "cmsis_compiler.h" /* CMSIS compiler specific defines */
+#include "cmsis_compiler.h" // IWYU pragma: keep
 
 #ifdef __cplusplus
 }
@@ -341,14 +341,14 @@ extern "C"
                 {
                         uint32_t ISR : 9; /*!< bit:  0.. 8  Exception number */
                         uint32_t _reserved0 : 1; /*!< bit:      9  Reserved */
-                        uint32_t
-                                ICI_IT_1 : 6; /*!< bit: 10..15  ICI/IT part 1 */
+                        uint32_t ICI_IT_1
+                                : 6;     /*!< bit: 10..15  ICI/IT part 1 */
                         uint32_t GE : 4; /*!< bit: 16..19  Greater than or Equal
                                             flags */
                         uint32_t _reserved1 : 4; /*!< bit: 20..23  Reserved */
                         uint32_t T : 1;          /*!< bit:     24  Thumb bit */
-                        uint32_t
-                                ICI_IT_2 : 2; /*!< bit: 25..26  ICI/IT part 2 */
+                        uint32_t ICI_IT_2
+                                : 2;    /*!< bit: 25..26  ICI/IT part 2 */
                         uint32_t Q : 1; /*!< bit:     27  Saturation condition
                                            flag */
                         uint32_t V : 1; /*!< bit:     28  Overflow condition
@@ -405,8 +405,8 @@ extern "C"
                 {
                         uint32_t nPRIV : 1; /*!< bit:      0  Execution
                                                privilege in Thread mode */
-                        uint32_t
-                                SPSEL : 1; /*!< bit:      1  Stack to be used */
+                        uint32_t SPSEL
+                                : 1;       /*!< bit:      1  Stack to be used */
                         uint32_t FPCA : 1; /*!< bit:      2  FP extension active
                                               flag */
                         uint32_t _reserved0 : 29; /*!< bit:  3..31  Reserved */

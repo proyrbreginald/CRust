@@ -273,7 +273,7 @@ extern "C"
 #endif /* LL_USART_ENABLE */
 
 #if (LL_UTILITY_ENABLE == DDL_ON)
-#include "hc32_ll_utility.h"
+#include "hc32_ll_utility.h" // IWYU pragma: keep
 #endif /* LL_UTILITY_ENABLE */
 
 #if (LL_USB_ENABLE == DDL_ON)

@@ -50,7 +50,7 @@
  * GNU Compiler
  */
 #elif defined(__GNUC__)
-#include "cmsis_gcc.h"
+#include "cmsis_gcc.h" // IWYU pragma: keep
 
 /*
  * IAR Compiler
