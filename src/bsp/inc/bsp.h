@@ -38,36 +38,6 @@ extern "C"
         void bsp_clock_init(void);
 
         /* ================================================================== */
-        /*  Debug UART */
-        /* ================================================================== */
-
-        /**
-         * @brief  Initialize the debug UART.
-         */
-        void bsp_uart_init(void);
-
-        /**
-         * @brief  Send a single character via debug UART.
-         */
-        void bsp_uart_putchar(char c);
-
-        /**
-         * @brief  Send a string via debug UART.
-         */
-        void bsp_uart_write(const char* str, unsigned int len);
-
-        /**
-         * @brief  Receive a single character via debug UART (blocking).
-         */
-        char bsp_uart_getchar(void);
-
-        /**
-         * @brief  Check if a character is available via debug UART.
-         * @return 1 if available, 0 otherwise.
-         */
-        int bsp_uart_available(void);
-
-        /* ================================================================== */
         /*  Timer / Delay */
         /* ================================================================== */
 
@@ -75,16 +45,6 @@ extern "C"
          * @brief  Initialize SysTick timer for 1ms ticks.
          */
         void bsp_timer_init(void);
-
-        /**
-         * @brief  Blocking delay in milliseconds.
-         */
-        void bsp_delay_tick(uint32_t ms);
-
-        /**
-         * @brief  Get current system tick count (1ms resolution).
-         */
-        uint64_t bsp_get_tick(void);
 
 #ifdef __cplusplus
 }

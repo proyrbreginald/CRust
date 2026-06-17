@@ -1,3 +1,4 @@
+#include <rtthread.h>
 #include <bsp.h>
 #include <main.h>
 #include <rtt.h>
@@ -32,7 +33,7 @@ void main(void)
         for (;;)
         {
                 BSP_LED_TOGGLE;
-                bsp_delay_tick(500u);
+                rt_thread_mdelay(500u);
                 rtt_write("tick\n", 5);
         }
 }

@@ -15,11 +15,11 @@
 
 _rtos_components_src = files(
     # ---- Finsh / MSH 命令行 ----
-    'finsh/shell.c',
-    'finsh/msh.c',
-    'finsh/msh_parse.c',
     'finsh/cmd.c',
     'finsh/msh_file.c',          # 内部有 #ifdef DFS_USING_POSIX 保护
+    'finsh/msh_parse.c',
+    'finsh/msh.c',
+    'finsh/shell.c',
 
     # ---- 设备驱动核心 ----
     # device.c — 基础设备模型（必需）
@@ -36,24 +36,22 @@ _rtos_components_src = files(
     'drivers/ipc/completion_up.c',
     'drivers/ipc/condvar.c',
     'drivers/ipc/dataqueue.c',
-    'drivers/ipc/pipe.c',
     'drivers/ipc/ringblk_buf.c',
     'drivers/ipc/ringbuffer.c',
     'drivers/ipc/waitqueue.c',
     'drivers/ipc/workqueue.c',
 
-    # ---- 串口设备框架 ----
-    'drivers/serial/dev_serial.c',     # V1 版本；若启用 V2 需换为 dev_serial_v2.c
+    # ---- 串口设备框架 (暂不启用，使用项目自有 LL UART) ----
+    # 'drivers/serial/dev_serial.c',
 
-    # ---- GPIO / Pin 设备框架 ----
-    'drivers/pin/dev_pin.c',
+    # ---- GPIO / Pin 设备框架 (暂不启用，使用项目自有 LL GPIO) ----
+    # 'drivers/pin/dev_pin.c',
 
-    # ---- I2C 设备框架 ----
-    # dev_i2c_bus.c 需要 RT_USING_DM，暂不加入
-    'drivers/i2c/dev_i2c_core.c',
-    'drivers/i2c/dev_i2c_dev.c',
-    'drivers/i2c/dev_i2c_bit_ops.c',
-    'drivers/i2c/dev_soft_i2c.c',
+    # ---- I2C 设备框架 (暂不启用，使用项目自有 LL I2C) ----
+    # 'drivers/i2c/dev_i2c_core.c',
+    # 'drivers/i2c/dev_i2c_dev.c',
+    # 'drivers/i2c/dev_i2c_bit_ops.c',
+    # 'drivers/i2c/dev_soft_i2c.c',
 
     # ---- newlib syscalls (ARM GCC 工具链) ----
     # 提供 _sbrk/_write/_read 等桩函数，使 newlib 的 malloc/printf 正常运作。

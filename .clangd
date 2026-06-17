@@ -1,0 +1,5 @@
+# 让 clangd 识别 arm-none-eabi-gcc 交叉编译器的内置头文件路径
+
+CompileFlags:
+    Add:
+        - --sysroot=/home/reginald/bin/arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-eabi/arm-none-eabi
