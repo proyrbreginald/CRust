@@ -11,7 +11,6 @@
 #define __RTM_H__
 
 #include <rtdef.h>
-#include <rtthread.h>
 
 #ifdef RT_USING_MODULE
 struct rt_module_symtab
