@@ -2,7 +2,10 @@
 #
 # RT-Thread board glue (project-specific, not the RT-Thread BSP)
 
-_rtos_board_src = files('board.c')
+_rtos_board_src = files(
+    'board.c',
+    'rtt_device.c',         # RTT 字符设备驱动
+)
 
 _rtos_board_inc = include_directories('.')
 

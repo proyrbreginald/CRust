@@ -180,7 +180,7 @@ rt_err_t rt_hw_backtrace_frame_get(rt_thread_t thread, struct rt_hw_backtrace_fr
 
 rt_err_t rt_hw_backtrace_frame_unwind(rt_thread_t thread, struct rt_hw_backtrace_frame *frame);
 
-void rt_hw_console_output(const char *str);
+void rt_hw_console_output(const char *str, long len);
 
 void rt_hw_show_memory(rt_uint32_t addr, rt_size_t size);
 

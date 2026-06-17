@@ -149,17 +149,16 @@ rt_weak const char *rt_hw_cpu_arch(void)
  */
 void rt_show_version(void)
 {
-    rt_kprintf("\n \\ | /\n");
 #if defined(RT_USING_SMART)
-    rt_kprintf("- RT -     Thread Smart Operating System\n");
+    rt_kprintf("\n \\ | /  Thread Smart Operating System\n");
 #elif defined(RT_USING_NANO)
-    rt_kprintf("- RT -     Thread Nano Operating System\n");
+    rt_kprintf("\n \\ | /  Thread Nano Operating System\n");
 #else
-    rt_kprintf("- RT -     Thread Operating System\n");
+    rt_kprintf("\n \\ | /  Thread Operating System\n");
 #endif
-    rt_kprintf(" / | \\     %d.%d.%d build %s %s\n",
+    rt_kprintf("- R T - %d.%d.%d build %s %s\n",
                (rt_int32_t)RT_VERSION_MAJOR, (rt_int32_t)RT_VERSION_MINOR, (rt_int32_t)RT_VERSION_PATCH, __DATE__, __TIME__);
-    rt_kprintf(" 2006 - 2024 Copyright by RT-Thread team\n");
+    rt_kprintf(" / | \\  2006 - 2024 Copyright by RT-Thread team\n");
 }
 RTM_EXPORT(rt_show_version);
 
@@ -208,10 +207,11 @@ rt_device_t rt_console_set_device(const char *name)
 RTM_EXPORT(rt_console_set_device);
 #endif /* RT_USING_DEVICE */
 
-rt_weak void rt_hw_console_output(const char *str)
+rt_weak void rt_hw_console_output(const char *str, long len)
 {
     /* empty console output */
     RT_UNUSED(str);
+    RT_UNUSED(len);
 }
 RTM_EXPORT(rt_hw_console_output);
 
@@ -320,7 +320,7 @@ static void _kputs(const char *str, long len)
 #ifdef RT_USING_DEVICE
     if (console_device == RT_NULL)
     {
-        rt_hw_console_output(str);
+        rt_hw_console_output(str, len);
     }
     else
     {
@@ -328,7 +328,7 @@ static void _kputs(const char *str, long len)
     }
 #else
     RT_UNUSED(len);
-    rt_hw_console_output(str);
+    rt_hw_console_output(str, len);
 #endif /* RT_USING_DEVICE */
 
     CONSOLE_RELEASE;

@@ -14,6 +14,7 @@ void SysTick_Handler(void)
         /* enter interrupt (RT-Thread nesting tracking) */
         rt_interrupt_enter();
 
+        SysTick_IncTick();
         rt_tick_increase();
 
         /* leave interrupt */
