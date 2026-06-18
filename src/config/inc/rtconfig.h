@@ -1,12 +1,3 @@
-/*
- * Copyright (c) 2025, PD-Embedded Project
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Auto-generated RT-Thread configuration file.
- * This file is included by -include rtconfig.h in the build system.
- */
-
 #ifndef __RT_CONFIG_H__
 #define __RT_CONFIG_H__
 
@@ -47,7 +38,7 @@
 /* ========== Device ========== */
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
-#define RT_CONSOLEBUF_SIZE 128
+#define RT_CONSOLEBUF_SIZE 256
 #define RT_CONSOLE_DEVICE_NAME "rtt"
 
 /* ========== Components ========== */
@@ -62,7 +53,7 @@
 #define FINSH_USING_MSH
 #define FINSH_THREAD_NAME "finsh"
 #define FINSH_THREAD_PRIORITY (RT_THREAD_PRIORITY_MAX - 2)
-#define FINSH_THREAD_STACK_SIZE (2 * 1024u)
+#define FINSH_THREAD_STACK_SIZE (1 * 1024u)
 #define FINSH_USING_HISTORY
 #define FINSH_HISTORY_LINES 5
 #define FINSH_USING_SYMTAB

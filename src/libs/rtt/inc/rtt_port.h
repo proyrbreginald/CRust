@@ -1,35 +1,15 @@
-/*
- * Copyright (C) 2025, Reginald
- *
- * rtt_port.h - RTT 移植层接口
- *
- * 提供平台无关的抽象层，适配不同 MCU 和编译器。
- * 用户需根据目标平台实现以下原语：
- *   1. 临界区保护（中断开关）
- *   2. 内存屏障（DMB/DSB）
- *   3. 缓冲区内存声明
- */
-
 #ifndef __RTT_PORT_H__
 #define __RTT_PORT_H__
 
-#include <stdint.h>
-
-/* ------------------------------------------------------------------ */
-/*  缓冲区大小配置（可根据需求修改）                                     */
-/* ------------------------------------------------------------------ */
+#include <rtthread.h>
 
 #ifndef RTT_UP_BUF_SIZE
-#define RTT_UP_BUF_SIZE 1024 /* 上行缓冲区：适合日志输出 */
+#define RTT_UP_BUF_SIZE (1 * 1024)
 #endif
 
 #ifndef RTT_DOWN_BUF_SIZE
-#define RTT_DOWN_BUF_SIZE 128 /* 下行缓冲区：适合命令输入 */
+#define RTT_DOWN_BUF_SIZE 128
 #endif
-
-/* ------------------------------------------------------------------ */
-/*  内存布局                                                           */
-/* ------------------------------------------------------------------ */
 
 /**
  * RTT_CB_SECTION - 控制块放置节区
@@ -50,28 +30,22 @@
 #define RTT_BUF_SECTION __attribute__((section(".rtt_buf")))
 #endif
 
-/* ------------------------------------------------------------------ */
-/*  平台原语（必须由移植层实现）                                         */
-/* ------------------------------------------------------------------ */
-
 /**
- * rtt_port_irq_save() - 保存中断状态并全局关中断
+ * rtt_lock - RTT 全局 spinlock
  *
- * 返回值：保存的中断状态字，后续传给 rtt_port_irq_restore()。
+ * 用于保护 RTT 控制块和缓冲区的并发访问。
+ * 在 rtt_port.c 中定义并初始化，各 API 函数通过
+ * rt_spin_lock_irqsave() / rt_spin_unlock_irqrestore() 使用。
  */
-unsigned long rtt_port_irq_save(void);
-
-/**
- * rtt_port_irq_restore() - 恢复中断状态
- * @flags:	rtt_port_irq_save() 返回的状态字
- */
-void rtt_port_irq_restore(unsigned long flags);
+extern struct rt_spinlock rtt_lock;
+#define RTT_LOCK rtt_lock
 
 /**
  * rtt_port_dmb() - 数据内存屏障
  *
  * 确保内存访问顺序，防止编译器/CPU 重排。
  * 在 ARM Cortex-M 上对应 __DMB()。
+ * 调试器通过 DAP 读取缓冲区时需要此屏障保证数据一致性。
  */
 void rtt_port_dmb(void);
 

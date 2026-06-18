@@ -1,47 +1,68 @@
-/*
- * Copyright (C) 2025, Reginald
- *
- * rrt.c - Real-Time Transfer 核心实现
- *
- * 实现单通道上下传输的 RTT 模块：
- *   - 上行：目标 CPU 写入，调试器（主机）读取
- *   - 下行：调试器（主机）写入，目标 CPU 读取
- *
- * 采用环形缓冲区 + 内存屏障保证数据一致性，
- * 中断保护防止目标侧并发访问。
- */
+#include <rtt_port.h>
+#include <string.h>
 
-#include "rtt.h"
-#include "rtt_port.h"
-
+/* 静态检查 */
 _Static_assert((RTT_UP_BUF_SIZE & (RTT_UP_BUF_SIZE - 1)) == 0,
                "UP buffer size must be power of 2");
 _Static_assert((RTT_DOWN_BUF_SIZE & (RTT_DOWN_BUF_SIZE - 1)) == 0,
                "DOWN buffer size must be power of 2");
 
-/* ------------------------------------------------------------------ */
-/*  SEGGER RTT 兼容定义                                                 */
-/* ------------------------------------------------------------------ */
+#include <rtt.h>
 
-#define SEGGER_RTT_MAX_NUM_UP_BUFFERS 1
-#define SEGGER_RTT_MAX_NUM_DOWN_BUFFERS 1
+/**
+ * struct rtt_channel - 单通道描述符
+ * @buf:	环形缓冲区基址
+ * @size:	缓冲区大小（必须为 2 的幂）
+ * @wr_off:     生产者写入偏移
+ * @rd_off:	消费者读取偏移
+ *
+ * 采用环形缓冲，通过 (write_offset - read_offset) & (size - 1)
+ * 计算有效数据长度。
+ */
+struct rtt_channel
+{
+        const char* name;
+        volatile uint8_t* buffer;
+        const rt_size_t size;
+        volatile rt_size_t write_offset;
+        volatile rt_size_t read_offset;
+        const uint32_t flags;
+};
+
+/**
+ * struct rtt_cb - RTT 控制块
+ * @magic:	魔数，供调试器扫描识别
+ * @flags:	保留标志
+ * @up:		上行通道（目标→主机，用于日志输出）
+ * @down:	下行通道（主机→目标，用于命令输入）
+ *
+ * 该结构必须放置于 RAM 中的固定地址（通过链接脚本或节区属性），
+ * 使调试器（如 J-Link RTT Viewer）可以通过内存扫描找到它。
+ */
+struct rtt_cb
+{
+        const char id[16];
+        const rt_size_t up_num;
+        const rt_size_t down_num;
+        struct rtt_channel up;
+        struct rtt_channel down;
+};
 
 /* 上行缓冲区 */
-static uint8_t rtt_up_buf[RTT_UP_BUF_SIZE] RTT_BUF_SECTION;
+static volatile uint8_t _rtt_up_buf[RTT_UP_BUF_SIZE] RTT_BUF_SECTION;
 
 /* 下行缓冲区 */
-static uint8_t rtt_down_buf[RTT_DOWN_BUF_SIZE] RTT_BUF_SECTION;
+static volatile uint8_t _rtt_down_buf[RTT_DOWN_BUF_SIZE] RTT_BUF_SECTION;
 
 /* 控制块 */
-struct rtt_cb _SEGGER_RTT RTT_CB_SECTION = {
-        .id = {'S', 'E', 'G', 'G', 'E', 'R', ' ', 'R', 'T', 'T', 0, 0, 0, 0, 0,
-               0},
-        .up_num = SEGGER_RTT_MAX_NUM_UP_BUFFERS,
-        .down_num = SEGGER_RTT_MAX_NUM_DOWN_BUFFERS,
+static struct rtt_cb _rtt_cb RTT_CB_SECTION = {
+        .id = "SEGGER RTT",
+        .up_num = 1,
+        .down_num = 1,
         .up =
                 {
-                        .name = "terminal",
-                        .buffer = rtt_up_buf,
+                        .name = "finsh-up",
+                        .buffer = _rtt_up_buf,
                         .size = RTT_UP_BUF_SIZE,
                         .write_offset = 0,
                         .read_offset = 0,
@@ -49,8 +70,8 @@ struct rtt_cb _SEGGER_RTT RTT_CB_SECTION = {
                 },
         .down =
                 {
-                        .name = "terminal",
-                        .buffer = rtt_down_buf,
+                        .name = "finsh-down",
+                        .buffer = _rtt_down_buf,
                         .size = RTT_DOWN_BUF_SIZE,
                         .write_offset = 0,
                         .read_offset = 0,
@@ -58,149 +79,114 @@ struct rtt_cb _SEGGER_RTT RTT_CB_SECTION = {
                 },
 };
 
-/* ------------------------------------------------------------------ */
-/*  辅助内联函数                                                       */
-/* ------------------------------------------------------------------ */
-
 /**
- * rtt_ring_avail() - 环形缓冲区中有效数据长度
- * @c:	通道描述符
- *
- * 返回值：生产者已写入但消费者尚未读取的字节数。
- */
-static inline uint32_t rtt_ring_avail(const struct rtt_channel* c)
-{
-        return (c->write_offset - c->read_offset) & (c->size - 1);
-}
-
-/**
- * rtt_ring_space() - 环形缓冲区剩余可用空间
- * @c:    通道描述符
- *
- * 返回值：生产者还能写入的字节数（保留一个字节区分空/满）。
- */
-static inline uint32_t rtt_ring_space(const struct rtt_channel* c)
-{
-        return (c->size - 1) -
-               ((c->write_offset - c->read_offset) & (c->size - 1));
-}
-
-/**
- * rtt_mask() - 对缓冲区大小取模（假设 size 为 2 的幂）
- * @val:	原始偏移值
- * @size:	缓冲区大小
- */
-static inline uint32_t rtt_mask(uint32_t val, uint32_t size)
-{
-        return val & (size - 1);
-}
-
-/* ------------------------------------------------------------------ */
-/*  内部核心函数                                                       */
-/* ------------------------------------------------------------------ */
-
-/**
- * __rtt_write() - 向通道写入数据（无锁版本）
- * @c:	通道描述符
+ * _rtt_write() - 内部：向上行通道写入数据（目标→主机）
  * @data:	数据指针
  * @len:	请求写入长度
  *
- * 调用者必须已进入临界区。
+ * 注意：调用者必须已持有 RTT_LOCK。
+ *
+ * 偏移量在 [0, size) 范围内回绕，采用"空一格"策略区分满与空：
+ *   有效数据 = (write_offset - read_offset) & (size - 1)
+ *   可用空间 = size - 1 - 有效数据
+ * 写入后 write_offset 回绕更新，并通过 DMB 保证调试器看到完整数据。
+ *
  * 返回值：实际写入的字节数。
  */
-static int __rtt_write(struct rtt_channel* c, const void* data, size_t len)
+static rt_err_t _rtt_write(const void* data, rt_size_t len)
 {
-        const uint8_t* src = data;
-        uint32_t space, remain, wr;
-        uint32_t cnt = 0;
+        struct rtt_channel* const up = &_rtt_cb.up;
+        const rt_size_t wr = up->write_offset;
+        const rt_size_t rd = up->read_offset;
+        const rt_size_t used = (wr - rd) & (up->size - 1u);
+        const rt_size_t avail = up->size - 1u - used;
 
-        space = rtt_ring_space(c);
-        if (space == 0)
-                return 0;
-
-        if (len > space)
-                len = space;
-
-        wr = rtt_mask(c->write_offset, c->size);
-        remain = c->size - wr;
-
-        if (len <= remain)
+        if (avail == 0)
         {
-                /* 一次拷贝即可完成 */
-                for (cnt = 0; cnt < len; cnt++)
-                        ((uint8_t*)c->buffer)[wr + cnt] = src[cnt];
+                return 0;
+        }
+
+        if (len > avail)
+        {
+                len = avail;
+        }
+
+        /* 写位置即 wr（已在 [0, size) 范围内） */
+        const rt_size_t remaining = up->size - wr;
+
+        if (len <= remaining)
+        {
+                memcpy((void*)&up->buffer[wr], data, len);
         }
         else
         {
-                /* 需要分两段拷贝（回绕） */
-                for (cnt = 0; cnt < remain; cnt++)
-                        ((uint8_t*)c->buffer)[wr + cnt] = src[cnt];
-                for (cnt = 0; cnt < len - remain; cnt++)
-                        ((uint8_t*)c->buffer)[cnt] = src[remain + cnt];
+                memcpy((void*)&up->buffer[wr], data, remaining);
+                memcpy((void*)&up->buffer[0], (const uint8_t*)data + remaining,
+                       len - remaining);
         }
 
-        /*
-         * 内存屏障：确保数据写入完成后再更新 wr_off。
-         * 主机端通过 DAP 读取时，需看到一致的数据。
-         */
+        /* 数据内存屏障：确保调试器通过 DAP 读到完整数据后再看到新的
+         * write_offset */
         rtt_port_dmb();
 
-        c->write_offset += len;
+        /* 回绕更新写入偏移 */
+        up->write_offset = (wr + len) & (up->size - 1u);
 
-        return (int)len;
+        return (rt_err_t)len;
 }
 
 /**
- * __rtt_read() - 从通道读取数据（无锁版本）
- * @c:	通道描述符
+ * _rtt_read() - 内部：从下行通道读取数据（主机→目标）
  * @buf:	接收缓冲区
  * @len:	请求读取长度
  *
- * 调用者必须已进入临界区。
+ * 注意：调用者必须已持有 RTT_LOCK。
+ *
+ * 偏移量在 [0, size) 范围内回绕：
+ *   有效数据 = (write_offset - read_offset) & (size - 1)
+ * 读出后 read_offset 回绕更新，并通过 DMB 保证生产者看到可用空间。
+ *
  * 返回值：实际读取的字节数。
  */
-static int __rtt_read(struct rtt_channel* c, void* buf, size_t len)
+static rt_err_t _rtt_read(void* buf, rt_size_t len)
 {
-        uint8_t* dst = buf;
-        uint32_t avail, remain, rd;
-        uint32_t cnt = 0;
+        struct rtt_channel* const down = &_rtt_cb.down;
+        const rt_size_t wr = down->write_offset;
+        const rt_size_t rd = down->read_offset;
+        const rt_size_t used = (wr - rd) & (down->size - 1u);
 
-        avail = rtt_ring_avail(c);
-        if (avail == 0)
-                return 0;
-
-        if (len > avail)
-                len = avail;
-
-        rd = rtt_mask(c->read_offset, c->size);
-        remain = c->size - rd;
-
-        if (len <= remain)
+        if (used == 0)
         {
-                for (cnt = 0; cnt < len; cnt++)
-                        dst[cnt] = ((uint8_t*)c->buffer)[rd + cnt];
+                return 0;
+        }
+
+        if (len > used)
+        {
+                len = used;
+        }
+
+        /* 读位置即 rd（已在 [0, size) 范围内） */
+        const rt_size_t remaining = down->size - rd;
+
+        if (len <= remaining)
+        {
+                memcpy(buf, (void*)&down->buffer[rd], len);
         }
         else
         {
-                for (cnt = 0; cnt < remain; cnt++)
-                        dst[cnt] = ((uint8_t*)c->buffer)[rd + cnt];
-                for (cnt = 0; cnt < len - remain; cnt++)
-                        dst[len - remain + cnt] = ((uint8_t*)c->buffer)[cnt];
+                memcpy(buf, (void*)&down->buffer[rd], remaining);
+                memcpy((uint8_t*)buf + remaining, (void*)&down->buffer[0],
+                       len - remaining);
         }
 
-        /*
-         * 内存屏障：确保数据读取完成后再更新 rd_off。
-         */
+        /* 数据内存屏障：确保 read_offset 更新不会比数据读取先被调试器看到 */
         rtt_port_dmb();
 
-        c->read_offset += len;
+        /* 回绕更新读取偏移 */
+        down->read_offset = (rd + len) & (down->size - 1u);
 
-        return (int)len;
+        return (rt_err_t)len;
 }
-
-/* ------------------------------------------------------------------ */
-/*  公共 API                                                           */
-/* ------------------------------------------------------------------ */
 
 /**
  * rtt_write() - 向上行通道写入数据（目标→主机）
@@ -211,17 +197,20 @@ static int __rtt_read(struct rtt_channel* c, void* buf, size_t len)
  *  -  0：缓冲区已满
  *  - <0：错误
  */
-int rtt_write(const void* data, size_t len)
+rt_err_t rtt_write(const void* data, rt_size_t len)
 {
-        unsigned long flags;
-        int ret;
+        if (data == NULL)
+        {
+                return RT_EINVAL;
+        }
+        if (len == 0)
+        {
+                return RT_EOK;
+        }
 
-        if (data == NULL || len == 0)
-                return -RTT_ERR_INVAL;
-
-        flags = rtt_port_irq_save();
-        ret = __rtt_write(&_SEGGER_RTT.up, data, len);
-        rtt_port_irq_restore(flags);
+        const rt_base_t level = rt_spin_lock_irqsave(&RTT_LOCK);
+        const rt_base_t ret = _rtt_write(data, len);
+        rt_spin_unlock_irqrestore(&RTT_LOCK, level);
 
         return ret;
 }
@@ -235,36 +224,21 @@ int rtt_write(const void* data, size_t len)
  *  -  0：无可用数据
  *  - <0：错误
  */
-int rtt_read(void* buf, size_t len)
+rt_err_t rtt_read(void* buf, rt_size_t len)
 {
-        unsigned long flags;
-        int ret;
+        if (buf == NULL)
+        {
+                return -RT_EINVAL;
+        }
 
-        if (buf == NULL || len == 0)
-                return -RTT_ERR_INVAL;
+        if (len == 0)
+        {
+                return RT_EOK;
+        }
 
-        flags = rtt_port_irq_save();
-        ret = __rtt_read(&_SEGGER_RTT.down, buf, len);
-        rtt_port_irq_restore(flags);
+        const rt_base_t level = rt_spin_lock_irqsave(&RTT_LOCK);
+        const rt_base_t ret = _rtt_read(buf, len);
+        rt_spin_unlock_irqrestore(&RTT_LOCK, level);
 
         return ret;
-}
-
-/**
- * rtt_puts() - 向上行通道写入字符串
- * @str:	NUL 结尾的字符串
- *
- * 返回值：写入的字符数（不含 NUL），负值表示错误。
- */
-int rtt_puts(const char* str)
-{
-        size_t len;
-
-        if (str == NULL)
-                return -RTT_ERR_INVAL;
-
-        for (len = 0; str[len] != '\0'; len++)
-                /* nothing */;
-
-        return rtt_write(str, len);
 }
