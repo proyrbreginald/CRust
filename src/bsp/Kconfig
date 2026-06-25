@@ -7,6 +7,34 @@ config BSP_BOARD
         Target board name. This selects the board-specific
         pin mappings and initialization parameters.
 
+# ------------------- Console Output -------------------
+choice
+    prompt "RTOS Console Output"
+    default BSP_CONSOLE_VIA_RTT
+    help
+        Select the output channel for RT-Thread console (rt_kprintf, Finsh/MSH).
+
+        - RTT:   Output via Segger RTT (requires debug probe, no UART pins).
+        - UART1: Output via UART1 polled TX (requires UART1 TX pin on board).
+
+config BSP_CONSOLE_VIA_RTT
+    bool "RTT (Segger Real-Time Transfer)"
+    help
+        Console output via Segger RTT. Works with J-Link / DAP-Link
+        debug probes. No UART hardware required.
+
+config BSP_CONSOLE_VIA_UART1
+    bool "UART1 (Polled TX)"
+    select LL_USART_ENABLE
+    help
+        Console output via UART1 polled transmission (115200-8-N-1).
+        Only TX is used for console output; RX is not configured.
+        UART1 peripheral clock and baudrate are configured, but GPIO
+        pin mapping is NOT configured by this option.
+        Pin mapping should be configured separately per board.
+
+endchoice
+
 # ------------------- Timer / Delay -------------------
 config BSP_USING_TIMER
     bool "Enable SysTick Timer"

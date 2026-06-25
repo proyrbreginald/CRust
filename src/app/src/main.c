@@ -30,6 +30,6 @@ void main(void)
         {
                 BSP_LED_TOGGLE;
                 rt_thread_mdelay(1000u);
-                // rt_kprintf("tick: %.1f\n", (float)SysTick_GetTick() / 1000.0f);
+                // rt_kprintf("hello\n");
         }
 }

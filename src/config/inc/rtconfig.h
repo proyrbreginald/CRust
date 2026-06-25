@@ -39,7 +39,19 @@
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 256
+
+/*
+ * Console device name:
+ * - BSP_CONSOLE_VIA_UART1: use "uart1" (polled UART1 TX)
+ * - BSP_CONSOLE_VIA_RTT (default): use "rtt" (Segger RTT)
+ *
+ * BSP_CONSOLE_VIA_UART1 is defined by Kconfig → menuconfig.h
+ */
+#ifdef BSP_CONSOLE_VIA_UART1
+#define RT_CONSOLE_DEVICE_NAME "uart1"
+#else
 #define RT_CONSOLE_DEVICE_NAME "rtt"
+#endif
 
 /* ========== Components ========== */
 #define RT_USING_COMPONENTS_INIT
@@ -54,8 +66,8 @@
 #define FINSH_THREAD_NAME "finsh"
 #define FINSH_THREAD_PRIORITY (RT_THREAD_PRIORITY_MAX - 2)
 #define FINSH_THREAD_STACK_SIZE (1 * 1024u)
-#define FINSH_USING_HISTORY
-#define FINSH_HISTORY_LINES 5
+// #define FINSH_USING_HISTORY
+// #define FINSH_HISTORY_LINES 5
 #define FINSH_USING_SYMTAB
 #define FINSH_CMD_SIZE 80
 #define MSH_USING_BUILT_IN_COMMANDS

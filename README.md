@@ -18,6 +18,9 @@ python -m ensurepip --upgrade
 
 # 安装依赖（pyOCD 等工具）
 pip install -r requirements.txt
+
+# 导出最简依赖
+pip list --not-required --format=freeze > requirements.txt
 ```
 
 ### 2. VS Code 状态栏构建

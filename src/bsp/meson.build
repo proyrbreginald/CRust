@@ -6,6 +6,7 @@
 _bsp_src = files(
     './src/bsp_init.c',
     './src/bsp_timer.c',
+    './src/bsp_uart.c',
 )
 
 # 私有头文件路径
